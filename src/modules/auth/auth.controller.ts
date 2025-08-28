@@ -112,13 +112,4 @@ export class AuthController {
   async resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto);
   }
-
-  @Post('test-email')
-  async testEmail() {
-    await this.mailservice.sendResetPasswordEmail(
-      'shax8897@gmail.com',
-      'https://example.com',
-    );
-    return { message: 'Test email sent' };
-  }
 }
