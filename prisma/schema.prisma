@@ -1,0 +1,93 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum QuestionType {
+    text
+    select
+    radio
+    checkbox
+    button
+}
+
+model User {
+    id           String  @id @default(uuid())
+    email        String  @unique
+    full_name    String
+    phone_number String  @unique
+    image_url    String?
+    password     String
+    profession   String?
+    position     String?
+
+    answers UserProfileQuestionAnswers[]
+
+    @@map("users")
+}
+
+model UserProfileQuestions {
+    id                         String                       @id @default(uuid())
+    question_text              String                       @unique
+    question_type              QuestionType
+    is_required                Boolean                      @default(false)
+    step_number                Int
+    options                    QuestionOptions[]
+    UserProfileQuestionAnswers UserProfileQuestionAnswers[]
+
+    @@map("user_profile_questions")
+}
+
+model QuestionOptions {
+    id           String @id @default(uuid())
+    question_id  String
+    option_text  String
+    option_value String
+
+    question              UserProfileQuestions    @relation(fields: [question_id], references: [id], onDelete: Cascade)
+    SelectedAnswerOptions SelectedAnswerOptions[]
+
+    @@map("question_options")
+}
+
+model UserProfileQuestionAnswers {
+    id          String @id @default(uuid())
+    user_id     String
+    question_id String
+    answer_text String
+
+    user     User                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
+    question UserProfileQuestions @relation(fields: [question_id], references: [id], onDelete: Cascade)
+
+    answer_options SelectedAnswerOptions[]
+
+    @@unique([user_id, question_id])
+    @@map("user_profile_question_anwsers")
+}
+
+model SelectedAnswerOptions {
+    id        String @id @default(uuid())
+    answer_id String
+    option_id String
+
+    answer UserProfileQuestionAnswers @relation(fields: [answer_id], references: [id], onDelete: Cascade)
+    option QuestionOptions            @relation(fields: [option_id], references: [id], onDelete: Cascade)
+
+    @@unique([answer_id, option_id])
+    @@map("selected_answer_options")
+}
+
+model Employee {
+    id              String   @id @default(uuid())
+    fullName        String
+    profession      String?
+    position        String?
+    photoUrl        String?
+    workloadSection Boolean  @default(true)
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @updatedAt
+}
